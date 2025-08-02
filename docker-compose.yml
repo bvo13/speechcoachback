@@ -1,0 +1,16 @@
+services:
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: speechdb
+      POSTGRES_USER: bvo
+      POSTGRES_PASSWORD: coach
+    volumes:
+      - speechdata:/var/lib/postgresql/data
+
+volumes:
+  speechdata:
