@@ -6,11 +6,15 @@ import com.speechcoach.demo.Entities.UserEntity;
 import com.speechcoach.demo.Mappers.UserMapper;
 import com.speechcoach.demo.Services.AuthenticationService;
 import com.speechcoach.demo.Services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @RestController
@@ -39,6 +43,29 @@ public class UserController {
             UserResponseDto userResponseDto = userMapper.mapTo(user);
             return new ResponseEntity<>(userResponseDto,HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+
+    }
+    @PostMapping("/users/me/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response){
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofSeconds(0))
+                .sameSite("Strict")
+                .build();
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofSeconds(0))
+                .sameSite("Strict")
+                .build();
+        authenticationService.logout();
+        return ResponseEntity.ok().headers(httpHeaders -> {
+            httpHeaders.add(HttpHeaders.SET_COOKIE,accessCookie.toString());
+            httpHeaders.add(HttpHeaders.SET_COOKIE,refreshCookie.toString());
+        }).build();
 
     }
 
