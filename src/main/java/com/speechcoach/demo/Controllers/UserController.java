@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -68,7 +70,26 @@ public class UserController {
         }).build();
 
     }
+    @PatchMapping("users/me")
+    public ResponseEntity<UserResponseDto> editUser(@RequestBody CreateUserDto createUserDto){
+        Long userId = authenticationService.getCurrentUserId();
+        if(!userService.userExists(userId)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        UserEntity user = userMapper.mapFrom(createUserDto);
+        UserResponseDto userResponseDto= userMapper.mapTo(userService.partialUpdate(userId, user));
+        return new ResponseEntity<>(userResponseDto,HttpStatus.OK);
 
+    }
+    @DeleteMapping("users/me")
+    public ResponseEntity<?> delete(){
+        Long id = authenticationService.getCurrentUserId();
+        if(!(userService.userExists(id))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        userService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 
 }
