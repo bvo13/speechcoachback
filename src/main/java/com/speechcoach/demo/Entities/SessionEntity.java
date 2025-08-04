@@ -17,21 +17,22 @@ public class SessionEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private final UserEntity user;
+    private UserEntity user;
 
-    private final Instant time=Instant.now();
+    private Instant time;
 
-    private final String audioKey;
+    private String audioKey;
 
-    private final double wpm;
+    private double wpm;
 
-    private final String summary;
+    private String summary;
 
     public SessionEntity(UserEntity user, String audioKey, double wpm, String summary){
         this.user=user;
         this.audioKey=audioKey;
         this.wpm=wpm;
         this.summary=summary;
+        this.time = Instant.now();
 
     }
 
